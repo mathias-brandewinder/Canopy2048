@@ -3,7 +3,7 @@
 open canopy
 open runner
 open System
-open Canopy2048.GreedyBot
+open Expectimax
 
 module program = 
 
@@ -31,11 +31,13 @@ module program =
             cells |> Seq.maxBy (fun cell -> cell.Value))
         |> Seq.toList
 
-    let moves = [| Up; Down; Left; Right; |]
+    let stateToArray (s : Cell list) = 
+        let g = Array2D.create 4 4 0
+        s |> List.map (fun c -> Array2D.set g (c.Row-1) (c.Col-1) c.Value) |> ignore
+        g
+
     let rng = System.Random ()
     
-    let decide (state:State) =
-        moves.[rng.Next(0,4)]
 
     let play (move:Move) =
         match move with
@@ -49,9 +51,9 @@ module program =
         move
 
     "starting a game of 2048" &&& fun _ ->
-
-        start chrome
-        url "http://gabrielecirulli.github.io/2048/"
+    
+        start firefox
+        url @"http://gabrielecirulli.github.io/2048/"
 
         let rec nextMove () =
             if finished () then 
@@ -61,7 +63,8 @@ module program =
                 printfn "Thinking"
                 let s = state ()
                 state ()
-                |> GreedyBot.decide
+                |> stateToArray
+                |> Expectimax.decide
                 |> showDecision
                 |> play
                 nextMove ()
