@@ -12,27 +12,24 @@ module program =
         | None -> false
         | Some(_) -> true
 
-    let cell col row =
-        let heading = (element ".heading")
-        let container = (element ".tile-container")
-        let mergedCss = sprintf ".tile-position-%i-%i.tile-merged" col row                
-        match (someElementWithin mergedCss container) with
-        | Some(x) -> Some { Col=col; Row=row; Value=int (x.Text) }
-        | None -> 
-            let newCss = sprintf ".tile-position-%i-%i.tile-new" col row
-            match (someElementWithin mergedCss container) with
-            | Some(x) -> Some { Col=col; Row=row; Value=int (x.Text) }
-            | None -> 
-                let css = sprintf ".tile-position-%i-%i" col row
-                match (someElementWithin css container) with
-                | Some(x) -> Some { Col=col; Row=row; Value=int (x.Text) }
-                | None -> None
-    
-    let state () =
-        [   for col in 1 .. 4 do
-                for row in 1 .. 4 do
-                    yield cell col row ]
-        |> List.choose id
+    let state () = 
+        elements ".tile"
+        |> List.map(fun tile ->
+            let classes = tile.GetAttribute("class").Split(' ')
+            let pointClass = classes |> Array.find(fun classs -> classs.StartsWith("tile-") && not (classs.StartsWith("tile-position-")))
+            let point = pointClass.Split('-').[1] |> int
+            let rowColumnClass = classes |> Array.find(fun classs -> classs.StartsWith("tile-position-"))
+            let column = rowColumnClass.Split('-').[2] |> int
+            let row = rowColumnClass.Split([|'-'|]).[3] |> int
+            { Row = row; Col = column; Value = point })
+        // removing the duplicates due to merges:
+        // group cell by identical row, col
+        // and keep the one with largest value,
+        // hacky but works...
+        |> Seq.groupBy (fun x -> x.Row, x.Col)
+        |> Seq.map (fun ((row,col),cells) -> 
+            cells |> Seq.maxBy (fun cell -> cell.Value))
+        |> Seq.toList
 
     let moves = [| Up; Down; Left; Right; |]
     let rng = System.Random ()
@@ -62,6 +59,7 @@ module program =
                 ignore ()
             else          
                 printfn "Thinking"
+                let s = state ()
                 state ()
                 |> GreedyBot.decide
                 |> showDecision
