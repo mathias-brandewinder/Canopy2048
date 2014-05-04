@@ -80,7 +80,7 @@ module Expectimax =
 
     let scoregrid grid = 
         let empties =  grid |> findZeroes |> List.length
-        let baseScore = grid |> makeList |> List.mapi (fun i x -> (sqr i)*(sqr i)* (sqr x)) |> List.sum
+        let baseScore = grid |> makeList |> List.mapi (fun i x -> (sqr i)*(sqr i)* (float i) * (sqr x)) |> List.sum
         let mutable score = baseScore       
         for i in [0..3] do
             let mutable maxrel = true
