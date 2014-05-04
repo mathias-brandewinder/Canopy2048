@@ -7,8 +7,13 @@ open Expectimax
 
 module program = 
 
-    let finished () =
+    let lost () =
         match someElement ".game-message.game-over" with
+        | None -> false
+        | Some(_) -> true
+
+    let won () =
+        match someElement ".game-message.game-won" with
         | None -> false
         | Some(_) -> true
 
@@ -36,9 +41,6 @@ module program =
         s |> List.map (fun c -> Array2D.set g (c.Row-1) (c.Col-1) c.Value) |> ignore
         g
 
-    let rng = System.Random ()
-    
-
     let play (move:Move) =
         match move with
         | Up -> press up
@@ -52,16 +54,16 @@ module program =
 
     "starting a game of 2048" &&& fun _ ->
     
-        start firefox
+        start chrome
         url @"http://gabrielecirulli.github.io/2048/"
 
         let rec nextMove () =
-            if finished () then 
-                printfn "Game over"
-                ignore ()
+            if lost () then 
+                printfn "Game over: loss!"
+            elif won () then
+                printfn "Game over: win!"                
             else          
-                printfn "Thinking"
-                let s = state ()
+                printfn "Thinking..."
                 state ()
                 |> stateToArray
                 |> Expectimax.decide
