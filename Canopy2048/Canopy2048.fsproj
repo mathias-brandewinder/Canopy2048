@@ -69,8 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.fs" />
-    <Compile Include="Expectimax.fs" />
     <Compile Include="GreedyBot.fs" />
+    <Compile Include="Expectimax.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

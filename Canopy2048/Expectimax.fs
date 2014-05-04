@@ -123,8 +123,14 @@ module Expectimax =
             let scoreRes = score2 * 0.9 + score4 * 0.1
             scoreRes
 
+    let stateToArray (s : Cell list) = 
+        let g = Array2D.create 4 4 0
+        s |> List.map (fun c -> Array2D.set g (c.Row-1) (c.Col-1) c.Value) |> ignore
+        g
 
-    let decide g=
+    let decide (state:State) =
+
+        let g = stateToArray state
         let possibilities = [for d in dirArray do 
                                 let (aw, gout) =collapsegrid g d
                                 if aw then  yield (d,gout)] 

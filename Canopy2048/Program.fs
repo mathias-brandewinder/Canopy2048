@@ -36,11 +36,6 @@ module program =
             cells |> Seq.maxBy (fun cell -> cell.Value))
         |> Seq.toList
 
-    let stateToArray (s : Cell list) = 
-        let g = Array2D.create 4 4 0
-        s |> List.map (fun c -> Array2D.set g (c.Row-1) (c.Col-1) c.Value) |> ignore
-        g
-
     let play (move:Move) =
         match move with
         | Up -> press up
@@ -65,7 +60,6 @@ module program =
             else          
                 printfn "Thinking..."
                 state ()
-                |> stateToArray
                 |> Expectimax.decide
                 |> showDecision
                 |> play
