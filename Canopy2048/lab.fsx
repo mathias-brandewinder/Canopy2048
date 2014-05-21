@@ -25,75 +25,21 @@ let row (state:State) (r:int) =
     |> Seq.toList
 
 let collapse (xs:int list) =
-    let rec dq acc stack =
+    let rec dq (score,acc) stack =
         match stack with
-        | [] -> acc
-        | [x] -> x::acc
+        | [] -> (score,acc)
+        | [x] -> (score,x::acc)
         | x::y::rest ->
             match (x=y) with
-            | true -> dq ((x+y)::acc) rest
-            | false -> dq (x::acc) (y::rest)
-    dq [] xs
+            | true -> dq (score+x,(x+y)::acc) rest
+            | false -> dq (score,x::acc) (y::rest)
+    dq (0,[]) xs
 
-(*
-Straightforward, with duplication
-*)
 
 let apply (action:Action) (stack:Value list) =
     match action with
     | Push -> collapse stack
     | Pull -> List.rev stack |> collapse
-
-let stackUp (state:State) =
-    let extractColumn = column state
-    seq { 
-        for col in 1 .. 4 do
-            yield!
-                extractColumn col
-                |> apply Push  
-                |> List.mapi (fun i value -> 
-                    { Row = i + 1; Col = col }, value)
-    } |> Map.ofSeq
-
-let stackDown (state:State) =
-    let extractColumn = column state
-    seq { 
-        for col in 1 .. 4 do
-            yield!
-                extractColumn col
-                |> apply Pull  
-                |> List.mapi (fun i value -> 
-                    { Row = 4 - i; Col = col }, value)
-    } |> Map.ofSeq
-
-let stackLeft (state:State) =
-    let extractRow = row state
-    seq { 
-        for row in 1 .. 4 do
-            yield!
-                extractRow row
-                |> apply Pull  
-                |> List.mapi (fun i value -> 
-                    { Row = row; Col = i + 1 }, value)
-    } |> Map.ofSeq
-
-let stackRight (state:State) =
-    let extractRow = row state
-    seq { 
-        for row in 1 .. 4 do
-            yield!
-                extractRow row
-                |> apply Push  
-                |> List.mapi (fun i value -> 
-                    { Row = row; Col = 4 - i }, value)
-    } |> Map.ofSeq
-
-let stackBy (state:State) (move:Move) =
-    match move with
-    | Up -> stackUp state
-    | Down -> stackDown state
-    | Left -> stackLeft state
-    | Right -> stackRight state
 
 (*
 Silly refactoring version
@@ -127,14 +73,18 @@ let execute (state:State) (move:Move) =
     let dir,action = orientation move
     let extractor = extractBy state dir
     let rehydrator = rehydrate dir action 
-    seq {
-        for pos in 1 .. 4 do
-            yield!
-                pos
-                |> extractor
-                |> apply action
-                |> rehydrator pos
-        } |> Map.ofSeq
+    let scores,rows = 
+        [   for pos in 1 .. 4 do
+                yield
+                    pos
+                    |> extractor
+                    |> apply action ]
+        |> List.unzip
+    scores |> Seq.sum, // total score
+    rows 
+    |> List.mapi (fun i xs -> rehydrator (i+1) xs) 
+    |> List.concat 
+    |> Map.ofList // reconstructed state
 
 (*
 Validation on a small example
