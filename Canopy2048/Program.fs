@@ -3,7 +3,7 @@
 open canopy
 open runner
 open System
-open Expectimax
+open GreedyBot
 
 module program = 
 
@@ -26,15 +26,15 @@ module program =
             let rowColumnClass = classes |> Array.find(fun classs -> classs.StartsWith("tile-position-"))
             let column = rowColumnClass.Split('-').[2] |> int
             let row = rowColumnClass.Split([|'-'|]).[3] |> int
-            { Row = row; Col = column; Value = point })
+            { Row = row; Col = column }, point )
         // removing the duplicates due to merges:
         // group cell by identical row, col
         // and keep the one with largest value,
         // hacky but works...
-        |> Seq.groupBy (fun x -> x.Row, x.Col)
+        |> Seq.groupBy (fun (pos,value) -> pos.Row, pos.Col)
         |> Seq.map (fun ((row,col),cells) -> 
-            cells |> Seq.maxBy (fun cell -> cell.Value))
-        |> Seq.toList
+            cells |> Seq.maxBy (fun (pos,value) -> value))
+        |> Map.ofSeq
 
     let play (move:Move) =
         match move with
@@ -60,7 +60,7 @@ module program =
             else          
                 printfn "Thinking..."
                 state ()
-                |> Expectimax.decide
+                |> GreedyBot.decide
                 |> showDecision
                 |> play
                 nextMove ()

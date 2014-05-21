@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.fs" />
+    <Compile Include="Game.fs" />
     <Compile Include="GreedyBot.fs" />
     <Compile Include="Expectimax.fs" />
     <Compile Include="Program.fs" />

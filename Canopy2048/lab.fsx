@@ -35,7 +35,6 @@ let collapse (xs:int list) =
             | false -> dq (score,x::acc) (y::rest)
     dq (0,[]) xs
 
-
 let apply (action:Action) (stack:Value list) =
     match action with
     | Push -> collapse stack
