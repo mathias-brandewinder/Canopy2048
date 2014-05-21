@@ -3,7 +3,7 @@
 open canopy
 open runner
 open System
-open GreedyBot
+open Expectimax
 
 module program = 
 
@@ -60,7 +60,7 @@ module program =
             else          
                 printfn "Thinking..."
                 state ()
-                |> GreedyBot.decide
+                |> Expectimax.decide
                 |> showDecision
                 |> play
                 nextMove ()
