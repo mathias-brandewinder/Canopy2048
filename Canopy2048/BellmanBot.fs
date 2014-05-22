@@ -33,7 +33,7 @@ module BellmanBot =
                                 yield (execute ``4 added`` choice |> fst)
                         } 
                     yield results |> Seq.min
-            } |> Seq.max
+            } |> Seq.max |> fun x -> x + score
     
     let rng = System.Random()
     let shuffle (arr:'a []) =
