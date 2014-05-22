@@ -76,3 +76,13 @@ module Game =
         |> List.mapi (fun i xs -> rehydrator (i+1) xs) 
         |> List.concat 
         |> Map.ofList // reconstructed state
+
+    let empty (state:State) =
+        let keys = state |> Seq.map (fun kv -> kv.Key)
+        seq {
+            for row in 1 .. 4 do
+                for col in 1 .. 4 do
+                    let key = { Row = row; Col = col; }
+                    if not (Seq.exists (fun k -> k = key) keys) 
+                    then yield key
+            }

@@ -4,6 +4,7 @@ open canopy
 open runner
 open System
 open Expectimax
+open BellmanBot
 
 module program = 
 
@@ -60,7 +61,7 @@ module program =
             else          
                 printfn "Thinking..."
                 state ()
-                |> Expectimax.decide
+                |> BellmanBot.decide
                 |> showDecision
                 |> play
                 nextMove ()

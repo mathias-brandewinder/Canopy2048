@@ -72,6 +72,7 @@
     <Compile Include="Game.fs" />
     <Compile Include="GreedyBot.fs" />
     <Compile Include="Expectimax.fs" />
+    <Compile Include="BellmanBot.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
