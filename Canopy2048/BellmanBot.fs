@@ -6,6 +6,17 @@ module BellmanBot =
 
     let moves = [| Up; Down; Left; Right; |]
 
+        
+    let rng = System.Random()
+    let shuffle (arr:'a []) =
+        let l = arr.Length
+        for i in (l-1) .. -1 .. 1 do
+            let temp = arr.[i]
+            let j = rng.Next(0,i+1)
+            arr.[i] <- arr.[j]
+            arr.[j] <- temp
+        arr
+
     let p2, p4 = 0.9, 0.1
 
     let nextStates (state:State) =
@@ -14,7 +25,7 @@ module BellmanBot =
         [ for pos in openSpaces do
             yield p2/count, state |> Map.add pos 2
             yield p4/count, state |> Map.add pos 4 ]
-                
+                    
     let rec scoreOf (state:State) (move:Move) (depth:int) =
         let score,next = execute state move
         if depth = 0 
@@ -29,18 +40,10 @@ module BellmanBot =
 
     and bestMove (state:State) (depth:int) =
         moves 
+        |> shuffle
         |> Seq.maxBy (fun move -> 
             scoreOf state move depth)
-    
-    let rng = System.Random()
-    let shuffle (arr:'a []) =
-        let l = arr.Length
-        for i in (l-1) .. -1 .. 1 do
-            let temp = arr.[i]
-            let j = rng.Next(0,i+1)
-            arr.[i] <- arr.[j]
-            arr.[j] <- temp
-        arr
+
 
     let decide (state:State) = bestMove state 2
         //moves |> shuffle |> Array.maxBy (bestMove state 2)        
