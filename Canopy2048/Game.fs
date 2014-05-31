@@ -86,3 +86,6 @@ module Game =
                     if not (Seq.exists (fun k -> k = key) keys) 
                     then yield key
             }
+
+    let invariant (state:State) (move:Move) =
+        state = snd (execute state move)

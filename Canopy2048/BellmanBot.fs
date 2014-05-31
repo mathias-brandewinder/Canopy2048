@@ -28,7 +28,9 @@ module BellmanBot =
                     
     let rec scoreOf (state:State) (move:Move) (depth:int) =
         let score,next = execute state move
-        if depth = 0 
+        if next = state
+        then 0.
+        elif depth = 0 
         then (float score)
         else 
             let nexts = nextStates next
@@ -39,11 +41,28 @@ module BellmanBot =
             float score + extra
 
     and bestMove (state:State) (depth:int) =
-        moves 
-        |> shuffle
-        |> Seq.maxBy (fun move -> 
-            scoreOf state move depth)
+        let validMoves = 
+            moves 
+            |> Seq.filter (fun move -> not (invariant state move))
+        match (Seq.isEmpty validMoves) with
+        | true -> Up // totally arbitrary
+        | false ->
+            validMoves
+            |> Seq.maxBy (fun move -> 
+                scoreOf state move depth)
 
-
-    let decide (state:State) = bestMove state 2
-        //moves |> shuffle |> Array.maxBy (bestMove state 2)        
+    let decide (state:State) = 
+        let validMoves = 
+            moves 
+            |> Seq.filter (fun move -> 
+                not (invariant state move))
+        match (Seq.length validMoves) with
+        | 0 -> Up // totally arbitrary
+        | 1 -> (Seq.head validMoves)
+        | _ ->  
+            let empties = empty state |> Seq.length
+            let depth = 
+                if empties > 4 then 2 
+                elif empties > 1 then 3
+                else 4
+            bestMove state depth
